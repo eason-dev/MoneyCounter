@@ -13,20 +13,33 @@ struct HistoryView: View {
     @Query(sort: [SortDescriptor(\History.date, order: .reverse)]) var histories: [History]
 
     var body: some View {
-        List {
-            ForEach(histories) { history in
-                NavigationLink(value: history.id) {
+        NavigationStack {
+            List {
+                ForEach(histories) { history in
                     VStack(alignment: .leading) {
-                       
                         Text(
                             history.date
                                 .formatted(date: .numeric, time: .omitted)
                         )
                     }
                 }
+                .onDelete(perform: deleteHistories)
             }
-//            .onDelete(perform: deleteDestinations)
+            .navigationTitle("History")
+            .toolbar {
+                EditButton()
+            }
         }
+    }
+    
+    func deleteHistories(_ indexSet: IndexSet) {
+        for index in indexSet {
+            let history = histories[index]
+            modelContext.delete(history)
+        }
+        do {
+            try modelContext.save()
+        } catch {}
     }
 }
 

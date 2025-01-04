@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct DenominationRow: View {
-    var denomination: Denomination
+    @Binding var denomination: Denomination
 
     var body: some View {
         HStack {
@@ -62,6 +62,6 @@ struct DenominationRow: View {
 }
 
 #Preview {
-    var denomination = Denomination(name: "100", value: 100)
-    DenominationRow(denomination: denomination)
+    @Previewable @State var denomination = Denomination(name: "100", value: 100)
+    DenominationRow(denomination: $denomination)
 }

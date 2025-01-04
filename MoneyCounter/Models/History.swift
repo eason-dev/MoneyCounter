@@ -32,6 +32,6 @@ class History: Identifiable {
             Denomination(name: "0.25", value: 25),
             Denomination(name: "0.1", value: 10),
             Denomination(name: "0.05", value: 5),
-        ]
+        ].sorted { $0.value > $1.value }
     }
 }
