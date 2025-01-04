@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct ContentView: View {
+struct MainView: View {
     var body: some View {
         TabView {
             CounterView()
@@ -21,6 +21,6 @@ struct ContentView: View {
     let preview = Preview()
     preview.addExamples(History.sampleHistories)
     
-    return ContentView()
+    return MainView()
         .modelContainer(preview.modelContainer)
 }

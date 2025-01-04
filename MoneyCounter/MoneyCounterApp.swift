@@ -12,7 +12,7 @@ import SwiftData
 struct MoneyCounterApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MainView()
         }
         .modelContainer(for: History.self, isAutosaveEnabled: true)
     }
