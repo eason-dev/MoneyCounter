@@ -11,17 +11,19 @@ import SwiftData
 @Model
 class Denomination: Identifiable {
     var id: UUID
-    var name: String
     var value: Int
     var count: Int
+    
+    var name: String {
+        return (Double(value) / 100).formatted()
+    }
     
     var subtotal: Double {
         return Double(count * value) / 100
     }
     
-    init(name: String, value: Int) {
+    init(value: Int) {
         self.id = UUID()
-        self.name = name
         self.value = value
         self.count = 0
     }

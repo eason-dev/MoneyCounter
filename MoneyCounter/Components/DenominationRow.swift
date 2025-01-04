@@ -62,6 +62,6 @@ struct DenominationRow: View {
 }
 
 #Preview {
-    @Previewable @State var denomination = Denomination(name: "100", value: 100)
+    @Previewable @State var denomination = Denomination(value: 10000)
     DenominationRow(denomination: $denomination)
 }

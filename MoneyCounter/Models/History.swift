@@ -22,16 +22,16 @@ class History: Identifiable {
         self.id = UUID()
         self.date = .now
         self.denominations = [
-            Denomination(name: "100", value: 10000),
-            Denomination(name: "50", value: 5000),
-            Denomination(name: "20", value: 2000),
-            Denomination(name: "10", value: 1000),
-            Denomination(name: "5", value: 500),
-            Denomination(name: "2", value: 200),
-            Denomination(name: "1", value: 100),
-            Denomination(name: "0.25", value: 25),
-            Denomination(name: "0.1", value: 10),
-            Denomination(name: "0.05", value: 5),
+            Denomination(value: 10000),
+            Denomination(value: 5000),
+            Denomination(value: 2000),
+            Denomination(value: 1000),
+            Denomination(value: 500),
+            Denomination(value: 200),
+            Denomination(value: 100),
+            Denomination(value: 25),
+            Denomination(value: 10),
+            Denomination(value: 5),
         ].sorted { $0.value > $1.value }
     }
 }
