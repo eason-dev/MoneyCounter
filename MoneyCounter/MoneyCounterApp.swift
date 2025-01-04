@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct MoneyCounterApp: App {
@@ -13,5 +14,6 @@ struct MoneyCounterApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(for: History.self, isAutosaveEnabled: true)
     }
 }

@@ -17,8 +17,10 @@ struct ContentView: View {
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
-    }
+#Preview {
+    let preview = Preview()
+    preview.addExamples(History.sampleHistories)
+    
+    return ContentView()
+        .modelContainer(preview.modelContainer)
 }

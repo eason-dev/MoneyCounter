@@ -6,13 +6,34 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct HistoryView: View {
+    @Environment(\.modelContext) var modelContext
+    @Query(sort: [SortDescriptor(\History.date, order: .reverse)]) var histories: [History]
+
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        List {
+            ForEach(histories) { history in
+                NavigationLink(value: history.id) {
+                    VStack(alignment: .leading) {
+                       
+                        Text(
+                            history.date
+                                .formatted(date: .numeric, time: .omitted)
+                        )
+                    }
+                }
+            }
+//            .onDelete(perform: deleteDestinations)
+        }
     }
 }
 
 #Preview {
-    HistoryView()
+    let preview = Preview()
+    preview.addExamples(History.sampleHistories)
+
+    return HistoryView()
+        .modelContainer(preview.modelContainer)
 }

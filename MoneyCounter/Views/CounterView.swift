@@ -6,24 +6,23 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct CounterView: View {
-    @State private var counts: [UUID: Int] = [:]
-    
-    private func subtotal(for denomination: Denomination) -> Double {
-        let count = counts[denomination.id] ?? 0
-        return Double(count) * (Double(denomination.value) / 100)
-    }
-    
-    private var total: Double {
-        denominations.reduce(0.0) { $0 + subtotal(for: $1) }
-    }
-    
+    @Environment(\.modelContext) var modelContext
+    @Query(sort: [SortDescriptor(\History.date, order: .reverse)]) var histories: [History]
+    var history: History { histories.first ?? History() }
+
     var body: some View {
         NavigationView {
             VStack {
+                Text(
+                    history.date
+                        .formatted(date: .numeric, time: .omitted)
+                    )
+
                 Group {
-                    List(denominations) { denomination in
+                    List(history.denominations) { denomination in
                         HStack {
                             Text(denomination.name)
                                 .font(.headline)
@@ -32,8 +31,8 @@ struct CounterView: View {
                             Spacer()
                             
                             Button {
-                                if let currentCount = counts[denomination.id], currentCount > 0 {
-                                    counts[denomination.id] = currentCount - 1
+                                if denomination.count > 0 {
+                                    denomination.count = denomination.count - 1
                                 }
                             } label: {
                                 Image(systemName: "minus")
@@ -46,8 +45,8 @@ struct CounterView: View {
                             .controlSize(.small)
                             
                             TextField("0", text: Binding(
-                                get: { String(counts[denomination.id] ?? 0) },
-                                set: { counts[denomination.id] = Int($0) ?? 0 }
+                                get: { String(denomination.count) },
+                                set: { denomination.count = Int($0) ?? 0 }
                             ))
                             .keyboardType(.numberPad)
                             .frame(width: 80)
@@ -56,7 +55,7 @@ struct CounterView: View {
                             .multilineTextAlignment(.center)
                             
                             Button {
-                                counts[denomination.id] = (counts[denomination.id] ?? 0) + 1
+                                denomination.count += 1
                             } label: {
                                 Image(systemName: "plus")
                                     .frame(width: 10, height: 10)
@@ -68,7 +67,7 @@ struct CounterView: View {
                             
                             Spacer()
                             
-                            Text(String(format: "$%.2f", subtotal(for: denomination)))
+                            Text(String(format: "$%.2f", denomination.subtotal))
                                 .frame(width: 80, alignment: .trailing)
                         }
                     }
@@ -79,7 +78,7 @@ struct CounterView: View {
                     Spacer()
                     Text("Total: ")
                         .font(.headline)
-                    Text(String(format: "$%.2f", total))
+                    Text(String(format: "$%.2f", history.total))
                         .font(.headline)
                         .bold()
                     Spacer()
@@ -92,5 +91,9 @@ struct CounterView: View {
 }
 
 #Preview {
-    CounterView()
+    let preview = Preview()
+    preview.addExamples(History.sampleHistories)
+    
+    return CounterView()
+        .modelContainer(preview.modelContainer)
 }
