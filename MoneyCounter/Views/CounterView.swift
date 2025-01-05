@@ -11,7 +11,9 @@ import SwiftData
 struct CounterView: View {
     @Environment(\.modelContext) var modelContext
     @Query(sort: [SortDescriptor(\History.date, order: .reverse)]) var histories: [History]
+    
     @State private var history: History = History()
+    @FocusState private var focusedFieldValue: Int?
 
     var body: some View {
         NavigationStack {
@@ -20,7 +22,10 @@ struct CounterView: View {
                     ForEach(
                         $history.denominations.sorted { $0.wrappedValue.value > $1.wrappedValue.value }
                     ) { $denomination in
-                        DenominationRow(denomination: $denomination)
+                        DenominationRow(
+                            denomination: $denomination,
+                            focusedFieldValue: _focusedFieldValue
+                        )
                     }
                 } header: {
                     Text(history.date
@@ -47,6 +52,16 @@ struct CounterView: View {
             .toolbar {
                 Button("New") {
                     saveHistory()
+                }
+            }
+            .toolbar {
+                ToolbarItem(placement: .keyboard) {
+                    HStack {
+                        Spacer()
+                        Button("Done") {
+                            focusedFieldValue = nil
+                        }
+                    }
                 }
             }
         }

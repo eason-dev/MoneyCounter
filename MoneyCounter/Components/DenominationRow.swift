@@ -9,6 +9,7 @@ import SwiftUI
 
 struct DenominationRow: View {
     @Binding var denomination: Denomination
+    @FocusState var focusedFieldValue: Int?
 
     var body: some View {
         HStack {
@@ -41,6 +42,7 @@ struct DenominationRow: View {
             .border(.secondary)
             .textFieldStyle(.roundedBorder)
             .multilineTextAlignment(.center)
+            .focused($focusedFieldValue, equals: denomination.value)
             
             Button {
                 denomination.count += 1
@@ -63,5 +65,10 @@ struct DenominationRow: View {
 
 #Preview {
     @Previewable @State var denomination = Denomination(value: 10000)
-    DenominationRow(denomination: $denomination)
+    @Previewable @FocusState var focusedFieldValue: Int?
+
+    DenominationRow(
+        denomination: $denomination,
+        focusedFieldValue: _focusedFieldValue
+    )
 }
