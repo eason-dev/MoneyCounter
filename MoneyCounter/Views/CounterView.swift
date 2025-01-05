@@ -24,7 +24,7 @@ struct CounterView: View {
                     }
                 } header: {
                     Text(history.date
-                        .formatted(date: .numeric, time: .omitted))
+                        .formatted(date: .numeric, time: .shortened))
                 } footer: {
                     HStack {
                         Spacer()

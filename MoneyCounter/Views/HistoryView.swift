@@ -19,7 +19,7 @@ struct HistoryView: View {
                     VStack(alignment: .leading) {
                         Text(
                             history.date
-                                .formatted(date: .numeric, time: .omitted)
+                                .formatted(date: .numeric, time: .shortened)
                         )
                     }
                 }
