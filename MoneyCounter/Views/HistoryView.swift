@@ -16,10 +16,14 @@ struct HistoryView: View {
         NavigationStack {
             List {
                 ForEach(histories) { history in
-                    VStack(alignment: .leading) {
+                    HStack {
                         Text(
                             history.date
                                 .formatted(date: .numeric, time: .shortened)
+                        )
+                        Spacer()
+                        Text(
+                            String(format: "$%.2f", history.total)
                         )
                     }
                 }
