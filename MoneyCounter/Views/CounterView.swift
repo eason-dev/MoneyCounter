@@ -57,6 +57,30 @@ struct CounterView: View {
             .toolbar {
                 ToolbarItem(placement: .keyboard) {
                     HStack {
+                        Button {
+                            if let currentValue = focusedFieldValue {
+                                let sortedDenominations = history.denominations.sorted { $0.value > $1.value }
+                                let currentDenominationIndex = sortedDenominations.firstIndex { $0.value == currentValue } ?? 0
+                                let previousDenominationIndex = currentDenominationIndex > 0 ? currentDenominationIndex - 1 : nil
+                                if previousDenominationIndex != nil {
+                                    focusedFieldValue = sortedDenominations[previousDenominationIndex!].value
+                                }
+                            }
+                        } label: {
+                            Image(systemName: "chevron.up")
+                        }
+                        Button {
+                            if let currentValue = focusedFieldValue {
+                                let sortedDenominations = history.denominations.sorted { $0.value > $1.value }
+                                let currentDenominationIndex = sortedDenominations.firstIndex { $0.value == currentValue } ?? 0
+                                let nextDenominationIndex = currentDenominationIndex < sortedDenominations.count - 1 ? currentDenominationIndex + 1 : nil
+                                if nextDenominationIndex != nil {
+                                    focusedFieldValue = sortedDenominations[nextDenominationIndex!].value
+                                }
+                            }
+                        } label: {
+                            Image(systemName: "chevron.down")
+                        }
                         Spacer()
                         Button("Done") {
                             focusedFieldValue = nil
