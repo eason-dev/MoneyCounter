@@ -10,6 +10,8 @@ import Foundation
 extension History {
     static var sampleHistories: [History] {
         [
+            History(),
+            History(),
             History()
         ]
     }

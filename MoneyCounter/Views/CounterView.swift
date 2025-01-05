@@ -18,7 +18,7 @@ struct CounterView: View {
             List {
                 Section {
                     ForEach(
-                        $history.denominations
+                        $history.denominations.sorted { $0.wrappedValue.value > $1.wrappedValue.value }
                     ) { $denomination in
                         DenominationRow(denomination: $denomination)
                     }
