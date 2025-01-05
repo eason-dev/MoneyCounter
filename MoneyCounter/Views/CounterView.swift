@@ -44,7 +44,18 @@ struct CounterView: View {
                     history = histories.first ?? History()
                 }
             }
+            .toolbar {
+                Button("New") {
+                    saveHistory()
+                }
+            }
         }
+    }
+
+    private func saveHistory() {
+        let newHistory = History()
+        modelContext.insert(newHistory)
+        history = newHistory
     }
 }
 
