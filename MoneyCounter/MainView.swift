@@ -17,6 +17,7 @@ struct MainView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     let preview = Preview()
     preview.addExamples(History.sampleHistories)
@@ -24,3 +25,4 @@ struct MainView: View {
     return MainView()
         .modelContainer(preview.modelContainer)
 }
+#endif

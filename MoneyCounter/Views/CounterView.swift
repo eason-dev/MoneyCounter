@@ -98,6 +98,7 @@ struct CounterView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     let preview = Preview()
     preview.addExamples(History.sampleHistories)
@@ -105,3 +106,4 @@ struct CounterView: View {
     return CounterView()
         .modelContainer(preview.modelContainer)
 }
+#endif

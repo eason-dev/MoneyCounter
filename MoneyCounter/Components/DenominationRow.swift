@@ -39,8 +39,7 @@ struct DenominationRow: View {
             ))
             .keyboardType(.numberPad)
             .frame(width: 80)
-            .border(.secondary)
-            .textFieldStyle(.roundedBorder)
+            .textFieldStyle(RoundedBorderTextFieldStyle())
             .multilineTextAlignment(.center)
             .focused($focusedFieldValue, equals: denomination.value)
             
