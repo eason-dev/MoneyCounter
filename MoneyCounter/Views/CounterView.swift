@@ -38,8 +38,7 @@ struct CounterView: View {
                     }
                 }
             }
-            .navigationTitle("Coin Counter")
-            .listStyle(.grouped)
+            .navigationTitle("Money Counter")
             .onAppear {
                 if histories.isEmpty {
                     let newHistory = History()
@@ -50,7 +49,7 @@ struct CounterView: View {
                 }
             }
             .toolbar {
-                Button("New") {
+                Button("Save") {
                     saveHistory()
                 }
             }

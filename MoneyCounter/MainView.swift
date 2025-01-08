@@ -13,7 +13,7 @@ struct MainView: View {
                     Label("History", systemImage: "clock")
                 }
         }
-
+        .tabViewStyle(.sidebarAdaptable)
     }
 }
 
