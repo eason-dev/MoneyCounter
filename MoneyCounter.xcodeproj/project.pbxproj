@@ -10,9 +10,22 @@
 		9B2E25922D2241E800BCB288 /* MoneyCounter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MoneyCounter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		9B3063672D2E5E910088A5D7 /* Exceptions for "MoneyCounter" folder in "MoneyCounter" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 9B2E25912D2241E800BCB288 /* MoneyCounter */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		9B2E25942D2241E800BCB288 /* MoneyCounter */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				9B3063672D2E5E910088A5D7 /* Exceptions for "MoneyCounter" folder in "MoneyCounter" target */,
+			);
 			path = MoneyCounter;
 			sourceTree = "<group>";
 		};
@@ -255,6 +268,7 @@
 				DEVELOPMENT_TEAM = 3LZ2MREQLX;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MoneyCounter/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Money Counter - Count My Money";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -286,6 +300,7 @@
 				DEVELOPMENT_TEAM = 3LZ2MREQLX;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MoneyCounter/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Money Counter - Count My Money";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
