@@ -53,13 +53,11 @@ struct CounterView: View {
     
     private var denominationSection: some View {
         Section {
-            ForEach($currentHistory.denominations) { $denomination in
-                if denomination.value > 0 { // Safety check
-                    DenominationRow(
-                        denomination: $denomination,
-                        focusedFieldValue: _focusedFieldValue
-                    )
-                }
+            ForEach($currentHistory.denominations.sorted { $0.wrappedValue.value > $1.wrappedValue.value }) { $denomination in
+                DenominationRow(
+                    denomination: $denomination,
+                    focusedFieldValue: _focusedFieldValue
+                )
             }
         } header: {
             Text(currentHistory.date, formatter: dateFormatter)
@@ -73,10 +71,9 @@ struct CounterView: View {
     }
     
     private var saveButton: some View {
-        Button("New Count") {
+        Button("Save") {
             saveNewHistory()
         }
-        .disabled(currentHistory.total == 0)
     }
     
     private var keyboardToolbar: some View {
