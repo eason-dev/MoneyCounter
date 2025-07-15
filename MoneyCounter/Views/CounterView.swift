@@ -8,92 +8,161 @@
 import SwiftUI
 import SwiftData
 
+/// Main counting interface for the money counter
 struct CounterView: View {
-    @Environment(\.modelContext) var modelContext
-    @Query(sort: [SortDescriptor(\History.date, order: .reverse)]) var histories: [History]
+    // MARK: - Properties
     
-    @State private var history: History = History()
+    @Environment(\.modelContext) private var modelContext
+    @Query(sort: [SortDescriptor(\History.date, order: .reverse)]) 
+    private var histories: [History]
+    
+    @State private var currentHistory: History = History()
+    @State private var hasLoadedInitialHistory = false
     @FocusState private var focusedFieldValue: Int?
+    
+    /// Date formatter for the section header
+    private let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        return formatter
+    }()
 
+    // MARK: - Body
+    
     var body: some View {
         NavigationStack {
             List {
-                Section {
-                    ForEach(
-                        $history.denominations.sorted { $0.wrappedValue.value > $1.wrappedValue.value }
-                    ) { $denomination in
-                        DenominationRow(
-                            denomination: $denomination,
-                            focusedFieldValue: _focusedFieldValue
-                        )
-                    }
-                } header: {
-                    Text(history.date
-                        .formatted(date: .numeric, time: .shortened))
-                } footer: {
-                    HStack {
-                        Spacer()
-                        Text("Total: \(String(format: "$%.2f", history.total))")
-                            .font(.headline)
-                    }
-                }
+                denominationSection
             }
             .navigationTitle("Money Counter")
-            .onAppear {
-                if histories.isEmpty {
-                    let newHistory = History()
-                    modelContext.insert(newHistory)
-                    history = newHistory
-                } else {
-                    history = histories.first ?? History()
-                }
-            }
+            .onAppear(perform: loadInitialHistory)
             .toolbar {
-                Button("Save") {
-                    saveHistory()
+                ToolbarItem(placement: .primaryAction) {
+                    saveButton
                 }
-            }
-            .toolbar {
+                
                 ToolbarItem(placement: .keyboard) {
-                    HStack {
-                        Button {
-                            if let currentValue = focusedFieldValue {
-                                let sortedDenominations = history.denominations.sorted { $0.value > $1.value }
-                                let currentDenominationIndex = sortedDenominations.firstIndex { $0.value == currentValue } ?? 0
-                                let previousDenominationIndex = currentDenominationIndex > 0 ? currentDenominationIndex - 1 : nil
-                                if previousDenominationIndex != nil {
-                                    focusedFieldValue = sortedDenominations[previousDenominationIndex!].value
-                                }
-                            }
-                        } label: {
-                            Image(systemName: "chevron.up")
-                        }
-                        Button {
-                            if let currentValue = focusedFieldValue {
-                                let sortedDenominations = history.denominations.sorted { $0.value > $1.value }
-                                let currentDenominationIndex = sortedDenominations.firstIndex { $0.value == currentValue } ?? 0
-                                let nextDenominationIndex = currentDenominationIndex < sortedDenominations.count - 1 ? currentDenominationIndex + 1 : nil
-                                if nextDenominationIndex != nil {
-                                    focusedFieldValue = sortedDenominations[nextDenominationIndex!].value
-                                }
-                            }
-                        } label: {
-                            Image(systemName: "chevron.down")
-                        }
-                        Spacer()
-                        Button("Done") {
-                            focusedFieldValue = nil
-                        }
-                    }
+                    keyboardToolbar
                 }
             }
         }
     }
-
-    private func saveHistory() {
+    
+    // MARK: - View Components
+    
+    private var denominationSection: some View {
+        Section {
+            ForEach($currentHistory.denominations) { $denomination in
+                if denomination.value > 0 { // Safety check
+                    DenominationRow(
+                        denomination: $denomination,
+                        focusedFieldValue: _focusedFieldValue
+                    )
+                }
+            }
+        } header: {
+            Text(currentHistory.date, formatter: dateFormatter)
+        } footer: {
+            HStack {
+                Spacer()
+                Text("Total: \(currentHistory.formattedTotal)")
+                    .font(.headline)
+            }
+        }
+    }
+    
+    private var saveButton: some View {
+        Button("New Count") {
+            saveNewHistory()
+        }
+        .disabled(currentHistory.total == 0)
+    }
+    
+    private var keyboardToolbar: some View {
+        HStack {
+            Button(action: navigateToPreviousField) {
+                Image(systemName: "chevron.up")
+            }
+            .disabled(!canNavigateUp)
+            
+            Button(action: navigateToNextField) {
+                Image(systemName: "chevron.down")
+            }
+            .disabled(!canNavigateDown)
+            
+            Spacer()
+            
+            Button("Done") {
+                focusedFieldValue = nil
+            }
+        }
+    }
+    
+    // MARK: - Computed Properties
+    
+    private var sortedDenominations: [Denomination] {
+        currentHistory.sortedDenominations
+    }
+    
+    private var currentFieldIndex: Int? {
+        guard let focusedValue = focusedFieldValue else { return nil }
+        return sortedDenominations.firstIndex { $0.value == focusedValue }
+    }
+    
+    private var canNavigateUp: Bool {
+        guard let index = currentFieldIndex else { return false }
+        return index > 0
+    }
+    
+    private var canNavigateDown: Bool {
+        guard let index = currentFieldIndex else { return false }
+        return index < sortedDenominations.count - 1
+    }
+    
+    // MARK: - Actions
+    
+    private func loadInitialHistory() {
+        guard !hasLoadedInitialHistory else { return }
+        hasLoadedInitialHistory = true
+        
+        if let mostRecent = histories.first {
+            currentHistory = mostRecent
+        } else {
+            // Create and save initial history
+            let newHistory = History()
+            modelContext.insert(newHistory)
+            currentHistory = newHistory
+            
+            // Save context
+            do {
+                try modelContext.save()
+            } catch {
+                print("Failed to save initial history: \(error)")
+            }
+        }
+    }
+    
+    private func saveNewHistory() {
         let newHistory = History()
         modelContext.insert(newHistory)
-        history = newHistory
+        
+        do {
+            try modelContext.save()
+            currentHistory = newHistory
+        } catch {
+            print("Failed to save new history: \(error)")
+        }
+    }
+    
+    private func navigateToPreviousField() {
+        guard let index = currentFieldIndex, index > 0 else { return }
+        focusedFieldValue = sortedDenominations[index - 1].value
+    }
+    
+    private func navigateToNextField() {
+        guard let index = currentFieldIndex, index < sortedDenominations.count - 1 else { return }
+        focusedFieldValue = sortedDenominations[index + 1].value
     }
 }
 

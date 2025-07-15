@@ -7,58 +7,80 @@
 
 import SwiftUI
 
+/// A row component displaying a single denomination with count controls
 struct DenominationRow: View {
     @Binding var denomination: Denomination
     @FocusState var focusedFieldValue: Int?
+    
+    /// Formatter for the count text field
+    private let countFormatter: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .none
+        formatter.minimum = 0
+        formatter.maximum = 9999
+        return formatter
+    }()
 
     var body: some View {
-        HStack {
-            Text(denomination.name)
+        HStack(spacing: 12) {
+            // Denomination name
+            Text(denomination.displayName)
                 .font(.headline)
-                .frame(width: 50, alignment: .leading)
+                .frame(width: 70, alignment: .leading)
             
             Spacer()
             
-            Button {
-                if denomination.count > 0 {
-                    denomination.count = denomination.count - 1
+            // Count controls
+            HStack(spacing: 8) {
+                // Decrease button
+                Button(action: decrementCount) {
+                    Image(systemName: "minus")
+                        .frame(width: 10, height: 10)
+                        .padding(4)
                 }
-            } label: {
-                Image(systemName: "minus")
-                    .frame(width: 10, height: 10)
-                    .padding(2)
+                .buttonStyle(.borderedProminent)
+                .buttonBorderShape(.circle)
+                .controlSize(.small)
+                .disabled(denomination.count == 0)
                 
+                // Count input field
+                TextField("0", value: $denomination.count, formatter: countFormatter)
+                    .keyboardType(.numberPad)
+                    .frame(width: 60)
+                    .textFieldStyle(.roundedBorder)
+                    .multilineTextAlignment(.center)
+                    .focused($focusedFieldValue, equals: denomination.value)
+                
+                // Increase button
+                Button(action: incrementCount) {
+                    Image(systemName: "plus")
+                        .frame(width: 10, height: 10)
+                        .padding(4)
+                }
+                .buttonStyle(.borderedProminent)
+                .buttonBorderShape(.circle)
+                .controlSize(.small)
             }
-            .buttonStyle(.borderedProminent)
-            .buttonBorderShape(.circle)
-            .controlSize(.small)
-            
-            TextField("0", text: Binding(
-                get: { String(denomination.count) },
-                set: { denomination.count = Int($0) ?? 0 }
-            ))
-            .keyboardType(.numberPad)
-            .frame(width: 80)
-            .textFieldStyle(RoundedBorderTextFieldStyle())
-            .multilineTextAlignment(.center)
-            .focused($focusedFieldValue, equals: denomination.value)
-            
-            Button {
-                denomination.count += 1
-            } label: {
-                Image(systemName: "plus")
-                    .frame(width: 10, height: 10)
-                    .padding(3)
-            }
-            .buttonStyle(.borderedProminent)
-            .buttonBorderShape(.circle)
-            .controlSize(.small)
             
             Spacer()
             
-            Text(String(format: "$%.2f", denomination.subtotal))
+            // Total amount
+            Text(denomination.formattedTotal)
+                .font(.body.monospacedDigit())
                 .frame(width: 80, alignment: .trailing)
+                .foregroundStyle(denomination.count > 0 ? .primary : .secondary)
         }
+        .padding(.vertical, 4)
+    }
+    
+    // MARK: - Actions
+    
+    private func incrementCount() {
+        denomination.count += 1
+    }
+    
+    private func decrementCount() {
+        denomination.count = max(0, denomination.count - 1)
     }
 }
 

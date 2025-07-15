@@ -8,42 +8,136 @@
 import SwiftUI
 import SwiftData
 
+/// View displaying the history of saved money counts
 struct HistoryView: View {
-    @Environment(\.modelContext) var modelContext
-    @Query(sort: [SortDescriptor(\History.date, order: .reverse)]) var histories: [History]
+    // MARK: - Properties
+    
+    @Environment(\.modelContext) private var modelContext
+    @Query(sort: [SortDescriptor(\History.date, order: .reverse)]) 
+    private var histories: [History]
+    
+    @State private var showingDeleteError = false
+    @State private var deleteErrorMessage = ""
+    
+    /// Date formatter for history entries
+    private let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        return formatter
+    }()
 
+    // MARK: - Body
+    
     var body: some View {
         NavigationStack {
-            List {
-                ForEach(histories) { history in
-                    HStack {
-                        Text(
-                            history.date
-                                .formatted(date: .numeric, time: .shortened)
-                        )
-                        Spacer()
-                        Text(
-                            String(format: "$%.2f", history.total)
-                        )
-                    }
+            Group {
+                if histories.isEmpty {
+                    emptyStateView
+                } else {
+                    historyList
                 }
-                .onDelete(perform: deleteHistories)
             }
             .navigationTitle("History")
             .toolbar {
-                EditButton()
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    EditButton()
+                        .disabled(histories.isEmpty)
+                }
+            }
+            .alert("Delete Error", isPresented: $showingDeleteError) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(deleteErrorMessage)
             }
         }
     }
     
-    func deleteHistories(_ indexSet: IndexSet) {
-        for index in indexSet {
-            let history = histories[index]
+    // MARK: - View Components
+    
+    private var historyList: some View {
+        List {
+            ForEach(histories) { history in
+                HistoryRow(history: history, dateFormatter: dateFormatter)
+            }
+            .onDelete(perform: deleteHistories)
+        }
+    }
+    
+    private var emptyStateView: some View {
+        ContentUnavailableView(
+            "No History",
+            systemImage: "clock.badge.xmark",
+            description: Text("Your counting history will appear here")
+        )
+    }
+    
+    // MARK: - Actions
+    
+    private func deleteHistories(_ indexSet: IndexSet) {
+        // Collect items to delete
+        let historiesToDelete = indexSet.map { histories[$0] }
+        
+        // Delete from context
+        for history in historiesToDelete {
             modelContext.delete(history)
         }
+        
+        // Save changes
         do {
             try modelContext.save()
-        } catch {}
+        } catch {
+            // Revert changes on error
+            modelContext.rollback()
+            
+            // Show error to user
+            deleteErrorMessage = "Failed to delete history: \(error.localizedDescription)"
+            showingDeleteError = true
+        }
+    }
+}
+
+// MARK: - History Row Component
+
+private struct HistoryRow: View {
+    let history: History
+    let dateFormatter: DateFormatter
+    
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(history.date, formatter: dateFormatter)
+                    .font(.body)
+                
+                if history.total > 0 {
+                    Text(denominationSummary)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            
+            Spacer()
+            
+            Text(history.formattedTotal)
+                .font(.body.monospacedDigit())
+                .fontWeight(.medium)
+                .foregroundStyle(history.total > 0 ? .primary : .secondary)
+        }
+        .padding(.vertical, 2)
+    }
+    
+    private var denominationSummary: String {
+        let nonZeroDenominations = history.denominations.filter { $0.count > 0 }
+        let count = nonZeroDenominations.count
+        
+        switch count {
+        case 0:
+            return "No denominations"
+        case 1:
+            return "1 denomination"
+        default:
+            return "\(count) denominations"
+        }
     }
 }
 

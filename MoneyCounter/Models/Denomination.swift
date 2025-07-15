@@ -12,14 +12,31 @@ import SwiftData
 class Denomination: Identifiable {
     var id: UUID
     var value: Int
-    var count: Int
+    var count: Int {
+        didSet {
+            // Ensure count is never negative
+            if count < 0 {
+                count = 0
+            }
+        }
+    }
     
     var name: String {
         return (Double(value) / 100).formatted()
     }
     
+    /// Formatted display name using Currency formatter
+    var displayName: String {
+        Currency.format(cents: value)
+    }
+    
     var subtotal: Double {
         return Double(count * value) / 100
+    }
+    
+    /// Total value formatted as currency
+    var formattedTotal: String {
+        Currency.format(cents: count * value)
     }
     
     init(value: Int) {

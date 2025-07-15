@@ -18,6 +18,16 @@ class History: Identifiable {
         return denominations.reduce(0.0) { $0 + $1.subtotal }
     }
     
+    /// Total value formatted as currency
+    var formattedTotal: String {
+        Currency.format(cents: Int(total * 100))
+    }
+    
+    /// Sorted denominations from highest to lowest value
+    var sortedDenominations: [Denomination] {
+        denominations.sorted { $0.value > $1.value }
+    }
+    
     init() {
         self.id = UUID()
         self.date = .now
