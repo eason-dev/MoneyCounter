@@ -18,14 +18,6 @@ struct HistoryView: View {
     
     @State private var showingDeleteError = false
     @State private var deleteErrorMessage = ""
-    
-    /// Date formatter for history entries
-    private let dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .short
-        return formatter
-    }()
 
     // MARK: - Body
     
