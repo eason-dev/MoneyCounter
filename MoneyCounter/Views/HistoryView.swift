@@ -8,42 +8,93 @@
 import SwiftUI
 import SwiftData
 
+/// View displaying the history of saved money counts
 struct HistoryView: View {
-    @Environment(\.modelContext) var modelContext
-    @Query(sort: [SortDescriptor(\History.date, order: .reverse)]) var histories: [History]
+    // MARK: - Properties
+    
+    @Environment(\.modelContext) private var modelContext
+    @Query(sort: [SortDescriptor(\History.date, order: .reverse)]) 
+    private var histories: [History]
+    
+    @State private var showingDeleteError = false
+    @State private var deleteErrorMessage = ""
 
+    // MARK: - Body
+    
     var body: some View {
         NavigationStack {
-            List {
-                ForEach(histories) { history in
-                    HStack {
-                        Text(
-                            history.date
-                                .formatted(date: .numeric, time: .shortened)
-                        )
-                        Spacer()
-                        Text(
-                            String(format: "$%.2f", history.total)
-                        )
-                    }
+            Group {
+                if histories.isEmpty {
+                    emptyStateView
+                } else {
+                    historyList
                 }
-                .onDelete(perform: deleteHistories)
             }
             .navigationTitle("History")
             .toolbar {
-                EditButton()
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    EditButton()
+                        .disabled(histories.isEmpty)
+                }
+            }
+            .alert("Delete Error", isPresented: $showingDeleteError) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(deleteErrorMessage)
             }
         }
     }
     
-    func deleteHistories(_ indexSet: IndexSet) {
-        for index in indexSet {
-            let history = histories[index]
+    // MARK: - View Components
+    
+    private var historyList: some View {
+        List {
+            ForEach(histories) { history in
+                HStack {
+                    Text(
+                        history.date
+                            .formatted(date: .numeric, time: .shortened)
+                    )
+                    Spacer()
+                    Text(
+                        String(format: "$%.2f", history.total)
+                    )
+                }
+            }
+            .onDelete(perform: deleteHistories)
+        }
+    }
+    
+    private var emptyStateView: some View {
+        ContentUnavailableView(
+            "No History",
+            systemImage: "clock.badge.xmark",
+            description: Text("Your counting history will appear here")
+        )
+    }
+    
+    // MARK: - Actions
+    
+    private func deleteHistories(_ indexSet: IndexSet) {
+        // Collect items to delete
+        let historiesToDelete = indexSet.map { histories[$0] }
+        
+        // Delete from context
+        for history in historiesToDelete {
             modelContext.delete(history)
         }
+        
+        // Save changes
         do {
             try modelContext.save()
-        } catch {}
+        } catch {
+            // Revert changes on error
+            modelContext.rollback()
+            
+            // Show error to user
+            deleteErrorMessage = "Failed to delete history: \(error.localizedDescription)"
+            showingDeleteError = true
+        }
     }
 }
 
