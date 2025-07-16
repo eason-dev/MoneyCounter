@@ -18,6 +18,7 @@ struct HistoryView: View {
     
     @State private var showingDeleteError = false
     @State private var deleteErrorMessage = ""
+    @State private var newHistory: History?
 
     // MARK: - Body
     
@@ -30,12 +31,21 @@ struct HistoryView: View {
                     historyList
                 }
             }
-            .navigationTitle("History")
+            .navigationTitle("Money Counter")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: createNewHistory) {
+                        Image(systemName: "plus")
+                    }
+                }
+                
+                ToolbarItem(placement: .navigationBarLeading) {
                     EditButton()
                         .disabled(histories.isEmpty)
                 }
+            }
+            .navigationDestination(item: $newHistory) { history in
+                EditCounterView(history: history)
             }
             .alert("Delete Error", isPresented: $showingDeleteError) {
                 Button("OK", role: .cancel) { }
@@ -50,15 +60,17 @@ struct HistoryView: View {
     private var historyList: some View {
         List {
             ForEach(histories) { history in
-                HStack {
-                    Text(
-                        history.date
-                            .formatted(date: .numeric, time: .shortened)
-                    )
-                    Spacer()
-                    Text(
-                        String(format: "$%.2f", history.total)
-                    )
+                NavigationLink(destination: EditCounterView(history: history)) {
+                    HStack {
+                        Text(
+                            history.date
+                                .formatted(date: .numeric, time: .shortened)
+                        )
+                        Spacer()
+                        Text(
+                            String(format: "$%.2f", history.total)
+                        )
+                    }
                 }
             }
             .onDelete(perform: deleteHistories)
@@ -74,6 +86,22 @@ struct HistoryView: View {
     }
     
     // MARK: - Actions
+    
+    private func createNewHistory() {
+        let history = History()
+        modelContext.insert(history)
+        
+        do {
+            try modelContext.save()
+            
+            // Delay navigation to ensure the history is properly saved
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                newHistory = history
+            }
+        } catch {
+            print("Failed to create new history: \(error)")
+        }
+    }
     
     private func deleteHistories(_ indexSet: IndexSet) {
         // Collect items to delete
