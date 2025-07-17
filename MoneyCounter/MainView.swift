@@ -2,18 +2,7 @@ import SwiftUI
 
 struct MainView: View {
     var body: some View {
-        TabView {
-            CounterView()
-                .tabItem {
-                    Label("Counter", systemImage: "number.circle")
-                }
-            
-            HistoryView()
-                .tabItem {
-                    Label("History", systemImage: "clock")
-                }
-        }
-        .tabViewStyle(.sidebarAdaptable)
+        HistoryView()
     }
 }
 

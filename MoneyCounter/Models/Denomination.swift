@@ -12,14 +12,7 @@ import SwiftData
 class Denomination: Identifiable {
     var id: UUID
     var value: Int
-    var count: Int {
-        didSet {
-            // Ensure count is never negative
-            if count < 0 {
-                count = 0
-            }
-        }
-    }
+    var count: Int
     
     var name: String {
         return (Double(value) / 100).formatted()

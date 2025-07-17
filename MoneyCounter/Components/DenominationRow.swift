@@ -44,7 +44,12 @@ struct DenominationRow: View {
                 .disabled(denomination.count == 0)
                 
                 // Count input field
-                TextField("0", value: $denomination.count, formatter: countFormatter)
+                TextField("0", value: Binding(
+                    get: { denomination.count },
+                    set: { newValue in
+                        denomination.count = max(0, newValue)
+                    }
+                ), formatter: countFormatter)
                     .keyboardType(.numberPad)
                     .frame(width: 60)
                     .textFieldStyle(.roundedBorder)
